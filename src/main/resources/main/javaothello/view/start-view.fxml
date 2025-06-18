@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="main.javaothello.controller.StartController"
+           stylesheets="/main/javaothello/css/styles.css"
+           prefHeight="600.0" prefWidth="800.0">
+
+    <VBox alignment="CENTER" spacing="20.0">
+        <padding>
+            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+        </padding>
+
+        <Text fx:id="titleText"
+              text="黑白棋"
+              styleClass="title-text"/>
+
+        <Button fx:id="startButton"
+                text="開始遊戲"
+                styleClass="menu-button"
+                onAction="#handleStartButton"/>
+
+        <Button fx:id="settingsButton"
+                text="設定"
+                styleClass="menu-button"
+                onAction="#handleSettingsButton"/>
+
+        <Button fx:id="exitButton"
+                text="離開遊戲"
+                styleClass="menu-button"
+                onAction="#handleExitButton"/>
+    </VBox>
+
+</StackPane>
