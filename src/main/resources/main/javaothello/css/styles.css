@@ -1,3 +1,4 @@
+//主面板
 .title-text {
     -fx-font-size: 48px;
     -fx-font-weight: bold;
@@ -15,4 +16,42 @@
 
 .menu-button:hover {
     -fx-background-color: #45a049;
+}
+
+.select-button {
+    -fx-min-width: 200px;
+    -fx-min-height: 40px;
+    -fx-font-size: 16px;
+    -fx-background-radius: 20;
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.select-button:hover {
+    -fx-background-color: #45a049;
+}
+
+//遊戲面板
+.timer-text {
+    -fx-font-size: 24px;
+    -fx-fill: #333333;
+}
+.status-text{
+    -fx-font-size: 24px;
+    -fx-fill: #333333;
+}
+.in-game-button{
+    -fx-min-width: 80px;
+    -fx-min-height: 20px;
+    -fx-font-size: 12px;
+    -fx-background-radius: 20;
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+.in-game-button:hover {
+    -fx-background-color: #45a049;
+}
+.result-text{
+    -fx-font-size: 24px;
+    -fx-fill: #333333;
 }

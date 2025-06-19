@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="main.javaothello.controller.ResultController"
+           stylesheets="/main/javaothello/css/styles.css"
+           prefHeight="600.0" prefWidth="800.0">
+
+    <VBox alignment="CENTER" spacing="20.0">
+        <padding>
+            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+        </padding>
+
+        <Text fx:id="titleText"
+              text="遊戲結束"
+              styleClass="title-text"/>
+
+        <Text fx:id="scoreText"
+              text= ""
+              styleClass="result-text"/>
+        <Text fx:id="winnerText"
+              text=""
+              styleClass="result-text"/>
+        <Text fx:id="timeText"
+              text=""
+              styleClass="result-text"/>
+
+        <HBox alignment="CENTER" spacing="10.0">
+            <Button fx:id="newGameButton" text="再來一場" styleClass = "in-game-button" onAction="#handleNewGameButton"/>
+            <Button fx:id="exitButton" text="回到目錄" styleClass = "in-game-button" onAction="#handleExitButton"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

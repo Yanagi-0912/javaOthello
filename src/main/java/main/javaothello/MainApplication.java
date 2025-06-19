@@ -35,7 +35,7 @@ public class MainApplication extends Application {
                 throw new IOException("FXML文件不存在");
             }
 
-            System.out.println("正在加载FXML：" + url);
+            System.out.println("正在加載FXML：" + url);
             FXMLLoader fxmlLoader = new FXMLLoader(url);
             Scene scene = new Scene(fxmlLoader.load(), WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -48,7 +48,7 @@ public class MainApplication extends Application {
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
-            System.err.println("加载场景时发生错误：" + e.getMessage());
+            System.err.println("加載場景時發生錯誤：" + e.getMessage());
             e.printStackTrace();
             throw e;
         }
