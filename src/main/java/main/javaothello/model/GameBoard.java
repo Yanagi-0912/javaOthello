@@ -6,52 +6,73 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class GameBoard {
-    private final GridPane boardGrid;
-    private final State gameState;
-    private static final int BOARD_SIZE = 8;
-    private static final double CELL_SIZE = 60.0;
-    private static final double DISC_RADIUS = 20.0;
-
-    public GameBoard(GridPane boardGrid) {
+    private final GridPane boardGrid;        // JavaFX網格布局，用於顯示棋盤
+    private final State gameState;           // 遊戲狀態對象，保存當前遊戲狀態
+    private static final int BOARD_SIZE = 8; // 棋盤大小（8x8）
+    private static final double CELL_SIZE = 60.0;    // 每個棋格的大小（像素）
+    private static final double DISC_RADIUS = 20.0;  // 棋子半徑（像素）
+    private gameMode gameMode; /**
+     * 構造函數
+     * @param boardGrid JavaFX網格布局組件，用於顯示棋盤
+     */
+    public GameBoard(GridPane boardGrid, gameMode gameMode) {
         this.boardGrid = boardGrid;
-        this.gameState = new State();
+        this.gameState = new State(gameMode);
     }
 
+    /**
+     * 初始化棋盤
+     * 清空棋盤，創建空白格子，設置初始棋子
+     */
     public void initializeBoard() {
-        boardGrid.getChildren().clear();
-        createEmptyCells();
-        initializeGameState();
-        updateBoard();  // 替換 placeInitialDiscs
+        boardGrid.getChildren().clear();     // 清空棋盤上所有元素
+        createEmptyCells();                  // 創建空白格子
+        initializeGameState();               // 初始化遊戲狀態
+        updateBoard();                       // 更新棋盤顯示
     }
 
+    /**
+     * 初始化遊戲狀態
+     * 設置初始的四個棋子（黑白各兩個）
+     */
     private void initializeGameState() {
         int[][] board = gameState.getBoard();
-        // 設置初始四顆棋子的狀態
+        // 設置初始四顆棋子的狀態（棋盤中心的2x2格子）
         board[3][3] = 2; // 白子
         board[3][4] = 1; // 黑子
         board[4][3] = 1; // 黑子
         board[4][4] = 2; // 白子
         gameState.setBoard(board);
-        gameState.setCurrentPlayer(1); // 黑子先手
-        updateGameStatus();  // 替換 updateScores
+        gameState.setCurrentPlayer(1); // 設置黑子先手
+        updateGameStatus();            // 更新遊戲狀態
     }
 
+    /**
+     * 更新遊戲狀態
+     * 計算黑白雙方的棋子數量
+     */
     private void updateGameStatus() {
-        int blackCount = 0;
-        int whiteCount = 0;
+        int blackCount = 0;    // 黑子數量
+        int whiteCount = 0;    // 白子數量
         int[][] board = gameState.getBoard();
 
+        // 遍歷整個棋盤計算黑白棋子數量
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                if (board[row][col] == 1) blackCount++;
-                else if (board[row][col] == 2) whiteCount++;
+                if (board[row][col] == 1) blackCount++;      // 計算黑子
+                else if (board[row][col] == 2) whiteCount++; // 計算白子
             }
         }
 
+        // 更新遊戲狀態中的分數
         gameState.setBlackScore(blackCount);
         gameState.setWhiteScore(whiteCount);
     }
 
+    /**
+     * 創建空白棋盤格子
+     * 為棋盤的每個位置創建一個可點擊的格子
+     */
     private void createEmptyCells() {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
@@ -61,44 +82,80 @@ public class GameBoard {
         }
     }
 
+    /**
+     * 創建單個棋格
+     * @param row 行號
+     * @param col 列號
+     * @return 返回創建好的棋格（StackPane對象）
+     */
     private StackPane createCell(int row, int col) {
         StackPane cell = new StackPane();
-        cell.setPrefSize(CELL_SIZE, CELL_SIZE);
-        cell.setStyle("-fx-background-color: green; -fx-border-color: black;");
-        cell.setOnMouseClicked(event -> handleCellClick(row, col));
+        cell.setPrefSize(CELL_SIZE, CELL_SIZE);                           // 設置格子大小
+        cell.setStyle("-fx-background-color: green; -fx-border-color: black;"); // 設置格子樣式
+        cell.setOnMouseClicked(event -> handleCellClick(row, col));      // 設置點擊事件處理
         return cell;
     }
 
+    /**
+     * 處理棋格點擊事件
+     * @param row 被點擊的格子的行號
+     * @param col 被點擊的格子的列號
+     */
     private void handleCellClick(int row, int col) {
+        // 檢查該位置是否為空
         if (gameState.getBoard()[row][col] == 0) {
             int currentPlayer = gameState.getCurrentPlayer();
+            // 檢查是否為合法落子位置
             if (isValidMove(row, col)) {
-                makeMove(row, col, currentPlayer);
-                updateGameStatus();  // 替換 updateScores
+                makeMove(row, col, currentPlayer);    // 落子
+                updateGameStatus();                   // 更新遊戲狀態
+                // 檢查對手是否有合法移動
                 if (!hasValidMoves(getOpponent(currentPlayer))) {
+                    // 如果當前玩家也沒有合法移動，遊戲結束
                     if (!hasValidMoves(currentPlayer)) {
                         gameState.setGameOver(true);
                     } else {
+                        // 對手沒有合法移動，跳過其回合
                         gameState.setSkipTurn(true);
                     }
                 } else {
-                    changePlayer();  // 替換 switchPlayer
+                    if (gameState.getGameMode() == gameMode.MULTI_PLAYER) {
+                        changePlayer(); // 多人模式下切換到對手
+                    } else if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
+                        //ToDO: 在單人模式下實現AI邏輯
+                    }
+                    changePlayer(); // 切換到下一個玩家
                 }
             }
         }
     }
 
+    /**
+     * 切換玩家
+     * 將當前玩家更改為對手
+     */
     private void changePlayer() {
         int currentPlayer = gameState.getCurrentPlayer();
         gameState.setCurrentPlayer(currentPlayer == 1 ? 2 : 1);
     }
 
+    /**
+     * 落子
+     * 在指定位置放置棋子，並翻轉被夾住的對手棋子
+     * @param row 行號
+     * @param col 列號
+     * @param player 當前玩家（1代表黑子，2代表白子）
+     */
     private void makeMove(int row, int col, int player) {
         gameState.getBoard()[row][col] = player;
-        updateCell(row, col, player == 1 ? Color.BLACK : Color.WHITE);  // 替換 addDisc
+        updateCell(row, col, player == 1 ? Color.BLACK : Color.WHITE);
         flipDiscs(row, col, player);
     }
 
+    /**
+     * 更新棋盤顯示
+     * 根據當前遊戲狀態更新棋盤上所有棋子的顯示
+     */
     private void updateBoard() {
         int[][] board = gameState.getBoard();
         for (int row = 0; row < BOARD_SIZE; row++) {
@@ -110,6 +167,12 @@ public class GameBoard {
         }
     }
 
+    /**
+     * 更新單個棋格的顯示
+     * @param row 行號
+     * @param col 列號
+     * @param color 棋子顏色
+     */
     private void updateCell(int row, int col, Color color) {
         Circle disc = new Circle(DISC_RADIUS, color);
         StackPane cell = (StackPane) boardGrid.getChildren().get(row * BOARD_SIZE + col);
@@ -119,6 +182,12 @@ public class GameBoard {
         }
     }
 
+    /**
+     * 檢查是否為合法落子位置
+     * @param row 行號
+     * @param col 列號
+     * @return 如果該位置為合法落子位置，返回true；否則返回false
+     */
     private boolean isValidMove(int row, int col) {
         if (gameState.getBoard()[row][col] != 0) {
             return false;
@@ -152,6 +221,12 @@ public class GameBoard {
         return false;
     }
 
+    /**
+     * 翻轉被夾住的對手棋子
+     * @param row 行號
+     * @param col 列號
+     * @param player 當前玩家（1代表黑子，2代表白子）
+     */
     private void flipDiscs(int row, int col, int player) {
         int[][] directions = {{-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}};
         int[][] board = gameState.getBoard();
@@ -183,10 +258,20 @@ public class GameBoard {
         }
     }
 
+    /**
+     * 獲取對手玩家
+     * @param player 當前玩家（1代表黑子，2代表白子）
+     * @return 對手玩家（1代表黑子，2代表白子）
+     */
     private int getOpponent(int player) {
         return player == 1 ? 2 : 1;
     }
 
+    /**
+     * 檢查玩家是否有合法移動
+     * @param player 玩家編號（1或2）
+     * @return 如果玩家有合法移動，返回true；否則返回false
+     */
     private boolean hasValidMoves(int player) {
         int[][] board = gameState.getBoard();
         for (int row = 0; row < BOARD_SIZE; row++) {
@@ -205,6 +290,10 @@ public class GameBoard {
         return false;
     }
 
+    /**
+     * 檢查遊戲是否結束
+     * @return 如果遊戲結束，返回true；否則返回false
+     */
     public boolean isGameOver() {
         int[][] board = gameState.getBoard();
         boolean boardIsFull = true;
@@ -223,6 +312,10 @@ public class GameBoard {
         return boardIsFull || (!hasValidMoves(1) && !hasValidMoves(2));
     }
 
+    /**
+     * 獲取當前遊戲狀態
+     * @return 當前遊戲狀態對象
+     */
     public State getGameState() {
         return gameState;
     }

@@ -9,8 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import main.javaothello.MainApplication;
-import main.javaothello.model.GameBoard;
-import main.javaothello.model.State;
+import main.javaothello.model.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,16 +28,16 @@ public class multiplayerGameController implements Initializable {
     private int seconds = 0;
     private boolean isPaused = false;
     private GameBoard gameBoard;
-
+    // Initialize the game board and other components
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gameBoard = new GameBoard(boardGrid);
+        gameBoard = new GameBoard(boardGrid, gameMode.MULTI_PLAYER);
         initializeGame();
         initializeTimer();
         setupButtons();
         setupGameUpdates();
     }
-
+    // Set up the game update mechanism to refresh the game state periodically
     private void setupGameUpdates() {
         gameUpdateTimeline = new Timeline(
             new KeyFrame(Duration.millis(100), event -> updateGameState())
@@ -61,7 +60,6 @@ public class multiplayerGameController implements Initializable {
 
     private void updateStatus(State state) {
         if (state.isGameOver()) {
-            statusText.setText(getWinnerText(state));
             if (gameUpdateTimeline != null) {
                 gameUpdateTimeline.stop();
             }
@@ -70,16 +68,6 @@ public class multiplayerGameController implements Initializable {
             state.setSkipTurn(false);
         } else {
             statusText.setText(state.getCurrentPlayer() == 1 ? "黑子回合" : "白子回合");
-        }
-    }
-
-    private String getWinnerText(State state) {
-        if (state.getBlackScore() > state.getWhiteScore()) {
-            return "遊戲結束 - 黑子勝利！";
-        } else if (state.getWhiteScore() > state.getBlackScore()) {
-            return "遊戲結束 - 白子勝利！";
-        } else {
-            return "遊戲結束 - 平局！";
         }
     }
 

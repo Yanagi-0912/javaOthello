@@ -7,14 +7,16 @@ public class State {
     private int whiteScore;
     private boolean isGameOver;
     private boolean skipTurn;
+    private gameMode gameMode; // Game mode (single player or multiplayer)
 
-    public State() {
+    public State(gameMode gameMode) {
         this.currentPlayer = 1; // Start with black
         this.board = new int[8][8]; // Initialize an empty board
         this.blackScore = 2; // Initial score for black
         this.whiteScore = 2; // Initial score for white
         this.isGameOver = false;
         this.skipTurn = false;
+        this.gameMode = gameMode; // Set the game mode
     }
 
     public int getCurrentPlayer() {
@@ -63,5 +65,8 @@ public class State {
 
     public void setSkipTurn(boolean skipTurn) {
         this.skipTurn = skipTurn;
+    }
+    public gameMode getGameMode() {
+        return gameMode;
     }
 }
