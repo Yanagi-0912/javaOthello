@@ -22,12 +22,12 @@ public class ModeSelectController {
 
     @FXML
     private void handleSinglePlayerButton() throws IOException {
-        MainApplication.switchScene("/main/javaothello/view/single-player-view.fxml");
+        MainApplication.switchScene("/main/javaothello/view/ai-select-view.fxml");
     }
 
     @FXML
     private void handleMultiplayerButton() throws IOException {
-        MainApplication.switchScene("/main/javaothello/view/multi-player-view.fxml");
+        MainApplication.switchScene("/main/javaothello/view/game-view.fxml");
     }
 
     @FXML

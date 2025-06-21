@@ -13,13 +13,18 @@ public class GameBoard {
     private static final double DISC_RADIUS = 20.0;  // 棋子半徑（像素）
     private gameMode gameMode;
     private int aiPlayer = 0; // AI玩家編號，0表示無AI
+    private final int depth[] = {1, 3, 5};
+    private int difficulty = 0; // 默認難度級別
     /**
      * 構造函數
      * @param boardGrid JavaFX網格布局組件，用於顯示棋盤
      */
-    public GameBoard(GridPane boardGrid, gameMode gameMode) {
+    public GameBoard(GridPane boardGrid, gameMode gameMode, int aiPlayer) {
         this.boardGrid = boardGrid;
         this.gameState = new State(gameMode);
+        if(aiPlayer != 0) {
+            this.aiPlayer = aiPlayer; // 設置AI玩家編號
+        }
     }
 
     /**
@@ -46,33 +51,11 @@ public class GameBoard {
         board[4][4] = 2; // 白子
         gameState.setBoard(board);
         gameState.setCurrentPlayer(1); // 設置黑子先手
-        updateGameStatus();            // 更新遊戲狀態
+        gameState.updateScores();      // 更新遊戲狀態
     }
 
     /**
-     * 更新遊戲狀態
-     * 計算黑白雙方的棋子數量
-     */
-    private void updateGameStatus() {
-        int blackCount = 0;    // 黑子數量
-        int whiteCount = 0;    // 白子數量
-        int[][] board = gameState.getBoard();
-
-        // 遍歷整個棋盤計算黑白棋子數量
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            for (int col = 0; col < BOARD_SIZE; col++) {
-                if (board[row][col] == 1) blackCount++;      // 計算黑子
-                else if (board[row][col] == 2) whiteCount++; // 計算白子
-            }
-        }
-
-        // 更新遊戲狀態中的分數
-        gameState.setBlackScore(blackCount);
-        gameState.setWhiteScore(whiteCount);
-    }
-
-    /**
-     * 創建空白棋盤格子
+     * 創建空白棋盤格�����
      * 為棋盤的每個位置創建一個可點擊的格子
      */
     private void createEmptyCells() {
@@ -100,17 +83,23 @@ public class GameBoard {
 
     /**
      * 處理棋格點擊事件
-     * @param row 被點擊的格子的行號
+     * @param row 被點��的格子的行號
      * @param col 被點擊的格子的列號
      */
     private void handleCellClick(int row, int col) {
         // 檢查該位置是否為空
         if (gameState.getBoard()[row][col] == 0) {
             int currentPlayer = gameState.getCurrentPlayer();
+
+            // 如果是AI的回合，則不處理玩家的點擊
+            if (gameState.getGameMode() == gameMode.SINGLE_PLAYER && currentPlayer == aiPlayer) {
+                return;
+            }
+
             // 檢查是否為合法落子位置
             if (gameState.isValidMove(row, col)) {
                 makeMove(row, col, currentPlayer);    // 落子
-                updateGameStatus();                   // 更新遊戲狀態
+                gameState.updateScores();    // 更新遊戲狀態
                 // 檢查對手是否有合法移動
                 int opponent = gameState.getOpponent(currentPlayer);
                 if (!gameState.hasValidMoves(opponent)) {
@@ -125,7 +114,17 @@ public class GameBoard {
                     changePlayer();
                     // 單人模式：切換到AI
                     if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
-                        //TODO: 在單人模式下實現AI邏輯
+                        currentPlayer = gameState.getCurrentPlayer();
+                        if (currentPlayer == aiPlayer) {
+                            // 如果是AI玩家，讓AI進行下一步
+                            AI ai = new AI(gameState, aiPlayer);
+                            Position aiMove = ai.minMax(depth[difficulty]);
+                            if (aiMove != null) {
+                                makeMove(aiMove.row, aiMove.col, aiPlayer);
+                                gameState.updateScores();
+                                changePlayer(); // 切換回人類玩家
+                            }
+                        }
                     }
                 }
             }

@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class multiplayerGameController implements Initializable {
+public class GameController implements Initializable {
     @FXML private GridPane boardGrid;
     @FXML private Text timerText;
     @FXML private Button pauseButton;
@@ -31,7 +31,6 @@ public class multiplayerGameController implements Initializable {
     // Initialize the game board and other components
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gameBoard = new GameBoard(boardGrid, gameMode.MULTI_PLAYER);
         initializeGame();
         initializeTimer();
         setupButtons();
@@ -89,6 +88,7 @@ public class multiplayerGameController implements Initializable {
     }
 
     private void initializeGame() {
+        gameBoard = new GameBoard(boardGrid, gameMode.MULTI_PLAYER, 0);
         gameBoard.initializeBoard();
         State state = gameBoard.getGameState();
         updateScore(state);

@@ -39,16 +39,8 @@ public class State {
         return blackScore;
     }
 
-    public void setBlackScore(int blackScore) {
-        this.blackScore = blackScore;
-    }
-
     public int getWhiteScore() {
         return whiteScore;
-    }
-
-    public void setWhiteScore(int whiteScore) {
-        this.whiteScore = whiteScore;
     }
 
     public boolean isGameOver() {
@@ -69,6 +61,10 @@ public class State {
 
     public gameMode getGameMode() {
         return gameMode;
+    }
+
+    public int getScore(int player) {
+        return player == 1 ? blackScore : whiteScore;
     }
 
     /**
@@ -140,5 +136,21 @@ public class State {
             }
         }
         return false;
+    }
+
+    public void updateScores() {
+        blackScore = 0;
+        whiteScore = 0;
+        for (int[] row : board) {
+            for (int cell : row) {
+                if (cell == 1) {
+                    blackScore++;
+                } else if (cell == 2) {
+                    whiteScore++;
+                }
+            }
+        }
+        this.whiteScore = whiteScore;
+        this.blackScore = blackScore;
     }
 }

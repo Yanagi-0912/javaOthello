@@ -62,7 +62,7 @@ public class ResultController implements Initializable {
 
     @FXML
     private void handleNewGameButton() throws IOException {
-        MainApplication.switchScene("/main/javaothello/view/multi-player-view.fxml");
+        MainApplication.switchScene("/main/javaothello/view/game-view.fxml");
     }
 
     @FXML
