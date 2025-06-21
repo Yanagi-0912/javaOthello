@@ -28,6 +28,10 @@ public class GameController implements Initializable {
     private int seconds = 0;
     private boolean isPaused = false;
     private GameBoard gameBoard;
+
+    private static int aiPlayer = 2; // 預設AI執白子
+    private static int aiDifficulty = 1; // 預設普通難度
+
     // Initialize the game board and other components
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -88,7 +92,9 @@ public class GameController implements Initializable {
     }
 
     private void initializeGame() {
-        gameBoard = new GameBoard(boardGrid, gameMode.MULTI_PLAYER, 0);
+        // 根據是否有 AI 玩家來決定遊戲模式
+        gameMode mode = (aiPlayer != 0) ? gameMode.SINGLE_PLAYER : gameMode.MULTI_PLAYER;
+        gameBoard = new GameBoard(boardGrid, mode, aiPlayer);
         gameBoard.initializeBoard();
         State state = gameBoard.getGameState();
         updateScore(state);
@@ -162,5 +168,20 @@ public class GameController implements Initializable {
             gameUpdateTimeline.stop();
         }
         MainApplication.switchScene("/main/javaothello/view/mode-select-view.fxml");
+    }
+
+    public static void setAISettings(int color, int difficulty) {
+        aiPlayer = color;
+        aiDifficulty = difficulty;
+    }
+
+    // 取得AI顏色
+    public static int getAIPlayer() {
+        return aiPlayer;
+    }
+
+    // 取得AI難度
+    public static int getAIDifficulty() {
+        return aiDifficulty;
     }
 }

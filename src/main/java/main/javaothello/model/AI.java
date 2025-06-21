@@ -112,13 +112,16 @@ public class AI {
 
     public int minNode(int depth, int alpha, int beta) {
         if (depth == 0 || gameState.isGameOver()) {
-            return gameState.getScore(3-aiPlayer);
+            return gameState.getScore(aiPlayer) - gameState.getScore(3-aiPlayer);
         }
 
         int minEval = Integer.MAX_VALUE;
+        boolean hasValidMove = false;
+
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 if (gameState.isValidMove(row, col)) {
+                    hasValidMove = true;
                     State newState = flipPieces(row, col);
                     State oldState = gameState;
                     gameState = newState;
@@ -132,18 +135,27 @@ public class AI {
                 }
             }
         }
-        return minEval;
 
+        // 如果沒有合法移動，立即返回當前局面評分
+        if (!hasValidMove) {
+            return gameState.getScore(aiPlayer) - gameState.getScore(3-aiPlayer);
+        }
+
+        return minEval;
     }
+
     public int maxNode(int depth, int alpha, int beta) {
         if (depth == 0 || gameState.isGameOver()) {
-            return gameState.getScore(aiPlayer);
+            return gameState.getScore(aiPlayer) - gameState.getScore(3-aiPlayer);
         }
 
         int maxEval = Integer.MIN_VALUE;
+        boolean hasValidMove = false;
+
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 if (gameState.isValidMove(row, col)) {
+                    hasValidMove = true;
                     State newState = flipPieces(row, col);
                     State oldState = gameState;
                     gameState = newState;
@@ -157,6 +169,12 @@ public class AI {
                 }
             }
         }
+
+        // 如果沒有合法移動，立即返回當前局面評分
+        if (!hasValidMove) {
+            return gameState.getScore(aiPlayer) - gameState.getScore(3-aiPlayer);
+        }
+
         return maxEval;
 
     }

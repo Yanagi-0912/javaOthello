@@ -5,16 +5,17 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Text?>
 <?import javafx.geometry.Insets?>
-
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.Region?>
+
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="main.javaothello.controller.AISelectController"
            stylesheets="/main/javaothello/css/styles.css"
            prefHeight="600.0" prefWidth="800.0">
 
-    <VBox alignment="TOP_CENTER" spacing="20.0">
+    <VBox alignment="CENTER" spacing="20.0">
         <padding>
             <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
         </padding>
@@ -23,29 +24,32 @@
               text="選擇電腦"
               styleClass="title-text"/>
 
-    </VBox>
+        <Region prefHeight="50.0"/>
 
-    <VBox alignment="CENTER" spacing="20.0">
-        <padding>
-            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
-        </padding>
+        <fx:define>
+            <ToggleGroup fx:id="colorGroup"/>
+        </fx:define>
 
         <RadioButton fx:id="blackButton"
-                     text="執黑子(先手)"
+                     text="執白子(後手)"
                      selected="true"
-                     styleClass="select-button"
+                     toggleGroup="$colorGroup"
+                     styleClass="radio-button"
                      onAction="#handleBlackButton"/>
         <RadioButton fx:id="whiteButton"
-                     text="執白子(後手)"
-                     styleClass="select-button"
+                     text="執黑子(先手)"
+                     toggleGroup="$colorGroup"
+                     styleClass="radio-button"
                      onAction="#handleWhiteButton"/>
+
+        <Region prefHeight="30.0"/>
 
         <Button fx:id="easyButton"
                 text="簡單"
                 styleClass="select-button"
-                onAction="#handleEasyPlayerButton"/>
+                onAction="#handleEasyButton"/>
 
-        <Button fx:id="normalplayerButton"
+        <Button fx:id="normalButton"
                 text="普通"
                 styleClass="select-button"
                 onAction="#handleNormalButton"/>
@@ -54,9 +58,9 @@
                 text="困難"
                 styleClass="select-button"
                 onAction="#handleHardButton"/>
-    </VBox>
 
-    <VBox alignment="BOTTOM_RIGHT" spacing="20.0">
+        <Region prefHeight="50.0"/>
+
         <Button fx:id="backButton"
                 text="返回上頁"
                 styleClass="select-button"

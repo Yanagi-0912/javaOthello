@@ -4,6 +4,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import main.javaothello.controller.GameController;
 
 public class GameBoard {
     private final GridPane boardGrid;        // JavaFX網格布局，用於顯示棋盤
@@ -24,6 +25,7 @@ public class GameBoard {
         this.gameState = new State(gameMode);
         if(aiPlayer != 0) {
             this.aiPlayer = aiPlayer; // 設置AI玩家編號
+            this.difficulty = GameController.getAIDifficulty(); // 從GameController獲取難度設置
         }
     }
 
@@ -32,14 +34,25 @@ public class GameBoard {
      * 清空棋盤，創建空白格子，設置初始棋子
      */
     public void initializeBoard() {
-        boardGrid.getChildren().clear();     // 清空棋盤上所有元素
+        boardGrid.getChildren().clear();     // 清空棋盤上所��元素
         createEmptyCells();                  // 創建空白格子
         initializeGameState();               // 初始化遊戲狀態
         updateBoard();                       // 更新棋盤顯示
+
+        // 如果是AI先手（執黑），則立即下棋
+        if (gameState.getGameMode() == gameMode.SINGLE_PLAYER && aiPlayer == 1) {
+            AI ai = new AI(gameState, aiPlayer);
+            Position aiMove = ai.minMax(depth[difficulty]);
+            if (aiMove != null) {
+                makeMove(aiMove.row, aiMove.col, aiPlayer);
+                gameState.updateScores();
+                changePlayer(); // 切換到玩家回合
+            }
+        }
     }
 
     /**
-     * 初始化遊戲狀態
+     * 初始化遊戲狀���
      * 設置初始的四個棋子（黑白各兩個）
      */
     private void initializeGameState() {
@@ -55,7 +68,7 @@ public class GameBoard {
     }
 
     /**
-     * 創建空白棋盤格�����
+     * 創建空白棋盤格
      * 為棋盤的每個位置創建一個可點擊的格子
      */
     private void createEmptyCells() {
@@ -100,30 +113,66 @@ public class GameBoard {
             if (gameState.isValidMove(row, col)) {
                 makeMove(row, col, currentPlayer);    // 落子
                 gameState.updateScores();    // 更新遊戲狀態
+
+                // 檢查是否遊戲結束
+                if (isGameOver()) {
+                    gameState.setGameOver(true);
+                    return;
+                }
+
                 // 檢查對手是否有合法移動
                 int opponent = gameState.getOpponent(currentPlayer);
                 if (!gameState.hasValidMoves(opponent)) {
                     // 如果當前玩家也沒有合法移動，遊戲結束
                     if (!gameState.hasValidMoves(currentPlayer)) {
                         gameState.setGameOver(true);
+                        return;
                     } else {
                         // 對手沒有合法移動，跳過其回合
                         gameState.setSkipTurn(true);
+                        return;
                     }
-                } else {
-                    changePlayer();
-                    // 單人模式：切換到AI
-                    if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
-                        currentPlayer = gameState.getCurrentPlayer();
-                        if (currentPlayer == aiPlayer) {
-                            // 如果是AI玩家，讓AI進行下一步
-                            AI ai = new AI(gameState, aiPlayer);
-                            Position aiMove = ai.minMax(depth[difficulty]);
-                            if (aiMove != null) {
-                                makeMove(aiMove.row, aiMove.col, aiPlayer);
-                                gameState.updateScores();
-                                changePlayer(); // 切換回人類玩家
+                }
+
+                changePlayer();
+                // 單人模式：切換到AI
+                if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
+                    currentPlayer = gameState.getCurrentPlayer();
+                    if (currentPlayer == aiPlayer) {
+                        // 如果是AI玩家，讓AI進行下一步
+                        AI ai = new AI(gameState, aiPlayer);
+                        Position aiMove = ai.minMax(depth[difficulty]);
+                        if (aiMove != null) {
+                            makeMove(aiMove.row, aiMove.col, aiPlayer);
+                            gameState.updateScores();
+
+                            // 檢查AI下棋後是否遊戲結束
+                            if (isGameOver()) {
+                                gameState.setGameOver(true);
+                                return;
                             }
+
+                            // 檢查玩家是否有合法移動
+                            if (!gameState.hasValidMoves(gameState.getOpponent(aiPlayer))) {
+                                // 如果AI也沒有合法移動，遊戲結束
+                                if (!gameState.hasValidMoves(aiPlayer)) {
+                                    gameState.setGameOver(true);
+                                    return;
+                                } else {
+                                    // 玩家沒有合法移動，AI繼續
+                                    gameState.setSkipTurn(true);
+                                    return;
+                                }
+                            }
+                            changePlayer(); // 切換回人類玩家
+                        } else {
+                            // AI無子可下，檢查玩家是否有子可下
+                            if (!gameState.hasValidMoves(gameState.getOpponent(aiPlayer))) {
+                                gameState.setGameOver(true);
+                                return;
+                            }
+                            gameState.setSkipTurn(true);
+                            changePlayer();
                         }
                     }
                 }
