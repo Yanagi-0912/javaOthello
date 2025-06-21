@@ -11,7 +11,9 @@ public class GameBoard {
     private static final int BOARD_SIZE = 8; // 棋盤大小（8x8）
     private static final double CELL_SIZE = 60.0;    // 每個棋格的大小（像素）
     private static final double DISC_RADIUS = 20.0;  // 棋子半徑（像素）
-    private gameMode gameMode; /**
+    private gameMode gameMode;
+    private int aiPlayer = 0; // AI玩家編號，0表示無AI
+    /**
      * 構造函數
      * @param boardGrid JavaFX網格布局組件，用於顯示棋盤
      */
@@ -106,25 +108,25 @@ public class GameBoard {
         if (gameState.getBoard()[row][col] == 0) {
             int currentPlayer = gameState.getCurrentPlayer();
             // 檢查是否為合法落子位置
-            if (isValidMove(row, col)) {
+            if (gameState.isValidMove(row, col)) {
                 makeMove(row, col, currentPlayer);    // 落子
                 updateGameStatus();                   // 更新遊戲狀態
                 // 檢查對手是否有合法移動
-                if (!hasValidMoves(getOpponent(currentPlayer))) {
+                int opponent = gameState.getOpponent(currentPlayer);
+                if (!gameState.hasValidMoves(opponent)) {
                     // 如果當前玩家也沒有合法移動，遊戲結束
-                    if (!hasValidMoves(currentPlayer)) {
+                    if (!gameState.hasValidMoves(currentPlayer)) {
                         gameState.setGameOver(true);
                     } else {
                         // 對手沒有合法移動，跳過其回合
                         gameState.setSkipTurn(true);
                     }
                 } else {
-                    if (gameState.getGameMode() == gameMode.MULTI_PLAYER) {
-                        changePlayer(); // 多人模式下切換到對手
-                    } else if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
-                        //ToDO: 在單人模式下實現AI邏輯
+                    changePlayer();
+                    // 單人模式：切換到AI
+                    if (gameState.getGameMode() == gameMode.SINGLE_PLAYER) {
+                        //TODO: 在單人模式下實現AI邏輯
                     }
-                    changePlayer(); // 切換到下一個玩家
                 }
             }
         }
@@ -182,44 +184,6 @@ public class GameBoard {
         }
     }
 
-    /**
-     * 檢查是否為合法落子位置
-     * @param row 行號
-     * @param col 列號
-     * @return 如果該位置為合法落子位置，返回true；否則返回false
-     */
-    private boolean isValidMove(int row, int col) {
-        if (gameState.getBoard()[row][col] != 0) {
-            return false;
-        }
-
-        int currentPlayer = gameState.getCurrentPlayer();
-        int opponent = getOpponent(currentPlayer);
-        int[][] board = gameState.getBoard();
-
-        // 檢查八個方向
-        int[][] directions = {{-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}};
-
-        for (int[] dir : directions) {
-            int newRow = row + dir[0];
-            int newCol = col + dir[1];
-            boolean hasOpponentDisc = false;
-
-            // 檢查這個方向是否可以翻轉對手的棋子
-            while (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE) {
-                if (board[newRow][newCol] == opponent) {
-                    hasOpponentDisc = true;
-                } else if (board[newRow][newCol] == currentPlayer && hasOpponentDisc) {
-                    return true;
-                } else {
-                    break;
-                }
-                newRow += dir[0];
-                newCol += dir[1];
-            }
-        }
-        return false;
-    }
 
     /**
      * 翻轉被夾住的對手棋子
@@ -230,7 +194,7 @@ public class GameBoard {
     private void flipDiscs(int row, int col, int player) {
         int[][] directions = {{-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}};
         int[][] board = gameState.getBoard();
-        int opponent = getOpponent(player);
+        int opponent = gameState.getOpponent(player);
 
         for (int[] dir : directions) {
             int newRow = row + dir[0];
@@ -258,37 +222,6 @@ public class GameBoard {
         }
     }
 
-    /**
-     * 獲取對手玩家
-     * @param player 當前玩家（1代表黑子，2代表白子）
-     * @return 對手玩家（1代表黑子，2代表白子）
-     */
-    private int getOpponent(int player) {
-        return player == 1 ? 2 : 1;
-    }
-
-    /**
-     * 檢查玩家是否有合法移動
-     * @param player 玩家編號（1或2）
-     * @return 如果玩家有合法移動，返回true；否則返回false
-     */
-    private boolean hasValidMoves(int player) {
-        int[][] board = gameState.getBoard();
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            for (int col = 0; col < BOARD_SIZE; col++) {
-                if (board[row][col] == 0) {
-                    int currentPlayer = gameState.getCurrentPlayer();
-                    gameState.setCurrentPlayer(player);
-                    boolean isValid = isValidMove(row, col);
-                    gameState.setCurrentPlayer(currentPlayer);
-                    if (isValid) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 
     /**
      * 檢查遊戲是否結束
@@ -309,7 +242,7 @@ public class GameBoard {
         }
 
         // 如果棋盤已滿或雙方都無法下棋，遊戲結束
-        return boardIsFull || (!hasValidMoves(1) && !hasValidMoves(2));
+        return boardIsFull || (!gameState.hasValidMoves(1) && !gameState.hasValidMoves(2));
     }
 
     /**
